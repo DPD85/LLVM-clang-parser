@@ -55,6 +55,11 @@ project(LLVM
   ${cmake_3_0_PROJ_VERSION}
   ${cmake_3_0_LANGUAGES}
   C CXX ASM)
+  
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  get_filename_component(CMAKE_INSTALL_PREFIX_DEFAULT "bin" ABSOLUTE)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX_DEFAULT}" CACHE PATH "default install path" FORCE)
+endif()
 
 # The following only works with the Ninja generator in CMake >= 3.0.
 set(LLVM_PARALLEL_COMPILE_JOBS "" CACHE STRING
@@ -221,7 +226,7 @@ set(LLVM_ALL_TARGETS
 # List of targets with JIT support:
 set(LLVM_TARGETS_WITH_JIT X86 PowerPC AArch64 ARM Mips SystemZ)
 
-set(LLVM_TARGETS_TO_BUILD "all"
+set(LLVM_TARGETS_TO_BUILD ""
     CACHE STRING "Semicolon-separated list of targets to build, or \"all\".")
 
 set(LLVM_EXPERIMENTAL_TARGETS_TO_BUILD ""
@@ -352,21 +357,21 @@ option(LLVM_INCLUDE_TOOLS "Generate build targets for the LLVM tools." ON)
 option(LLVM_BUILD_TOOLS
   "Build the LLVM tools. If OFF, just generate build targets." ON)
 
-option(LLVM_INCLUDE_UTILS "Generate build targets for the LLVM utils." ON)
+option(LLVM_INCLUDE_UTILS "Generate build targets for the LLVM utils." OFF)
 
 option(LLVM_BUILD_RUNTIME
-  "Build the LLVM runtime libraries." ON)
+  "Build the LLVM runtime libraries." OFF)
 option(LLVM_BUILD_EXAMPLES
   "Build the LLVM example programs. If OFF, just generate build targets." OFF)
-option(LLVM_INCLUDE_EXAMPLES "Generate build targets for the LLVM examples" ON)
+option(LLVM_INCLUDE_EXAMPLES "Generate build targets for the LLVM examples" OFF)
 
 option(LLVM_BUILD_TESTS
   "Build LLVM unit tests. If OFF, just generate build targets." OFF)
-option(LLVM_INCLUDE_TESTS "Generate build targets for the LLVM unit tests." ON)
-option(LLVM_INCLUDE_GO_TESTS "Include the Go bindings tests in test build targets." ON)
+option(LLVM_INCLUDE_TESTS "Generate build targets for the LLVM unit tests." OFF)
+option(LLVM_INCLUDE_GO_TESTS "Include the Go bindings tests in test build targets." OFF)
 
 option (LLVM_BUILD_DOCS "Build the llvm documentation." OFF)
-option (LLVM_INCLUDE_DOCS "Generate build targets for llvm documentation." ON)
+option (LLVM_INCLUDE_DOCS "Generate build targets for llvm documentation." OFF)
 option (LLVM_ENABLE_DOXYGEN "Use doxygen to generate llvm API documentation." OFF)
 option (LLVM_ENABLE_SPHINX "Use Sphinx to generate llvm documentation." OFF)
 
@@ -418,6 +423,11 @@ include(HandleLLVMOptions)
 # FIXME: We should support systems with only Python 3, but that requires work
 # on LLDB.
 set(Python_ADDITIONAL_VERSIONS 2.7)
+if(WIN32)
+  get_filename_component(PYTHON_EXECUTABLE "../../tools/python-win/python.exe" ABSOLUTE)
+elseif(UNIX)
+  get_filename_component(PYTHON_EXECUTABLE "../../tools/python-linux/bin/python" ABSOLUTE)
+endif()
 include(FindPythonInterp)
 if( NOT PYTHONINTERP_FOUND )
   message(FATAL_ERROR

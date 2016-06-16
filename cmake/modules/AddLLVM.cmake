@@ -783,7 +783,9 @@ macro(add_llvm_subdirectory project type name)
     if(${project}_${type}_${nameUPPER}_BUILD)
       add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/${add_llvm_external_dir} ${add_llvm_external_dir})
       # Don't process it in add_llvm_implicit_projects().
-      set(${project}_${type}_${nameUPPER}_BUILD OFF)
+      if(NOT ${nameUPPER} STREQUAL "LIBCLANG")
+        set(${project}_${type}_${nameUPPER}_BUILD OFF)
+      endif()
     endif()
   else()
     set(LLVM_EXTERNAL_${nameUPPER}_SOURCE_DIR
@@ -839,8 +841,13 @@ function(create_subdirectory_options project type)
   foreach(dir ${sub-dirs})
     if(IS_DIRECTORY "${dir}" AND EXISTS "${dir}/CMakeLists.txt")
       canonicalize_tool_name(${dir} name)
-      option(${project}_${type}_${name}_BUILD
-           "Whether to build ${name} as part of ${project}" On)
+      if(${name} STREQUAL "CLANG" OR ${name} STREQUAL "LIBCLANG")
+        option(${project}_${type}_${name}_BUILD
+             "Whether to build ${name} as part of ${project}" ON)
+      else()
+        option(${project}_${type}_${name}_BUILD
+             "Whether to build ${name} as part of ${project}" OFF)
+      endif()
       mark_as_advanced(${project}_${type}_${name}_BUILD)
     endif()
   endforeach()
